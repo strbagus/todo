@@ -6,12 +6,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       - PORT=8080
       - DB_PATH=/data/todo.db
       - TZ=Asia/Jakarta
-      - AUTH_USERNAME=${AUTH_USERNAME:-admin}
-      - AUTH_PASSWORD=${AUTH_PASSWORD}
     volumes:
       - todo_data:/data
     networks:
