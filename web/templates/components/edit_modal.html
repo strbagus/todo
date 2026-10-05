@@ -1,0 +1,104 @@
+{{define "edit_modal.html"}}
+<div id="edit-modal" class="modal-backdrop" onclick="if(event.target===this) this.remove()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">✏️ Edit Item</h3>
+      <button type="button" class="action-btn" onclick="document.getElementById('edit-modal').remove()">✕</button>
+    </div>
+    <form hx-put="/items/{{.ID}}"
+          hx-target="#item-{{.ID}}"
+          hx-swap="outerHTML"
+          hx-on::after-request="if(event.detail.successful) { document.getElementById('edit-modal').remove(); }">
+      <div class="modal-body">
+        <div id="edit-form-error-msg" style="color: #f87171; font-size: 0.85rem; margin-bottom: 0.75rem;"></div>
+
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <div class="type-selector">
+            <label class="type-option {{if eq .Type "college_task"}}active{{end}}" onclick="selectEditType(this, 'college_task')">
+              <input type="radio" name="type" value="college_task" {{if eq .Type "college_task"}}checked{{end}} style="display:none;">
+              🎓 College Task
+            </label>
+            <label class="type-option {{if eq .Type "work_due"}}active{{end}}" onclick="selectEditType(this, 'work_due')">
+              <input type="radio" name="type" value="work_due" {{if eq .Type "work_due"}}checked{{end}} style="display:none;">
+              💼 Work Due
+            </label>
+            <label class="type-option {{if eq .Type "event"}}active{{end}}" onclick="selectEditType(this, 'event')">
+              <input type="radio" name="type" value="event" {{if eq .Type "event"}}checked{{end}} style="display:none;">
+              📅 Event
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Title *</label>
+          <input type="text" name="title" class="form-control" value="{{.Title}}" required autofocus>
+        </div>
+
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label class="form-label" id="edit-label-start-at">{{if eq .Type "event"}}Event Start *{{else}}Due Date *{{end}}</label>
+            <input type="datetime-local" name="start_at" class="form-control" value="{{formatDateTimeInput .StartAt}}" required>
+          </div>
+          <div id="edit-end-at-container" style="{{if eq .Type "event"}}display:block;{{else}}display:none;{{end}}">
+            <label class="form-label">End Date (optional)</label>
+            <input type="datetime-local" name="end_at" class="form-control" value="{{if .EndAt}}{{formatDateTimeInput .EndAt}}{{end}}">
+          </div>
+          <div id="edit-priority-container" style="{{if eq .Type "event"}}display:none;{{else}}display:block;{{end}}">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-control">
+              <option value="low" {{if eq .Priority "low"}}selected{{end}}>Low</option>
+              <option value="medium" {{if eq .Priority "medium"}}selected{{end}}>Medium</option>
+              <option value="high" {{if eq .Priority "high"}}selected{{end}}>High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <label class="form-label">Course / Project Tag</label>
+            <input type="text" name="context_tag" class="form-control" value="{{.ContextTag}}">
+          </div>
+          <div>
+            <label class="form-label">Location or URL</label>
+            <input type="text" name="location_or_url" class="form-control" value="{{.LocationOrURL}}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description (optional)</label>
+          <textarea name="description" class="form-control" rows="2">{{.Description}}</textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('edit-modal').remove()">Cancel</button>
+        <button type="submit" class="btn-primary">Update Item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function selectEditType(el, type) {
+  document.querySelectorAll('#edit-modal .type-option').forEach(opt => opt.classList.remove('active'));
+  el.classList.add('active');
+  const radio = el.querySelector('input[type="radio"]');
+  if (radio) radio.checked = true;
+
+  const endContainer = document.getElementById('edit-end-at-container');
+  const priorityContainer = document.getElementById('edit-priority-container');
+  const labelStart = document.getElementById('edit-label-start-at');
+
+  if (type === 'event') {
+    if (endContainer) endContainer.style.display = 'block';
+    if (priorityContainer) priorityContainer.style.display = 'none';
+    if (labelStart) labelStart.textContent = 'Event Start *';
+  } else {
+    if (endContainer) endContainer.style.display = 'none';
+    if (priorityContainer) priorityContainer.style.display = 'block';
+    if (labelStart) labelStart.textContent = 'Due Date *';
+  }
+}
+</script>
+{{end}}
