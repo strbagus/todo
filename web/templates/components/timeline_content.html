@@ -1,0 +1,15 @@
+{{define "timeline_content.html"}}
+{{if and (not .Groups.Overdue) (not .Groups.Today) (not .Groups.Tomorrow) (not .Groups.Upcoming) (not .Groups.Completed)}}
+  <div style="text-align: center; padding: 4rem 1rem; color: #64748b;">
+    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎉</div>
+    <div style="font-size: 1.1rem; font-weight: 500; color: #94a3b8;">All caught up!</div>
+    <div style="font-size: 0.875rem; margin-top: 0.25rem;">Press <span class="shortcut-key">o</span> to add an event or deadline</div>
+  </div>
+{{else}}
+  {{template "timeline_group.html" dict "Name" "🚨 Overdue" "Class" "overdue" "Items" .Groups.Overdue}}
+  {{template "timeline_group.html" dict "Name" "☀️ Today" "Class" "today" "Items" .Groups.Today}}
+  {{template "timeline_group.html" dict "Name" "🌅 Tomorrow" "Class" "tomorrow" "Items" .Groups.Tomorrow}}
+  {{template "timeline_group.html" dict "Name" "🗓️ Upcoming" "Class" "upcoming" "Items" .Groups.Upcoming}}
+  {{template "timeline_group.html" dict "Name" "✅ Completed" "Class" "completed" "Items" .Groups.Completed}}
+{{end}}
+{{end}}

@@ -1,0 +1,15 @@
+{{define "timeline_group.html"}}
+{{if .Items}}
+<section class="group-section">
+  <div class="group-header {{.Class}}">
+    <span>{{.Name}}</span>
+    <span class="badge-count {{.Class}}">{{len .Items}}</span>
+  </div>
+  <div class="card-list">
+    {{range .Items}}
+      {{template "item_card.html" .}}
+    {{end}}
+  </div>
+</section>
+{{end}}
+{{end}}

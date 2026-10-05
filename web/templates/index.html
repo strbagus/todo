@@ -1,0 +1,74 @@
+{{template "base.html" .}}
+
+{{define "content"}}
+<header class="header">
+  <div>
+    <h1 class="date-display">{{formatDate .TodayDate}}</h1>
+    <p class="subtitle">Focus & Deadlines Dashboard</p>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <button id="btn-add-item" class="btn-primary" onclick="document.getElementById('add-modal').classList.remove('hidden')">
+      <span>+ Add (o)</span>
+    </button>
+    <button class="btn-secondary" onclick="document.getElementById('cheatsheet-modal').classList.toggle('hidden')" title="Keyboard shortcuts (?)">
+      <span>⌨️ ?</span>
+    </button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="filters">
+    <button class="filter-btn active"
+            hx-get="/items/filter"
+            hx-target="#timeline-container"
+            onclick="setActiveFilter(this)">
+      All
+    </button>
+    <button class="filter-btn"
+            hx-get="/items/filter?type=college_task"
+            hx-target="#timeline-container"
+            onclick="setActiveFilter(this)">
+      College
+    </button>
+    <button class="filter-btn"
+            hx-get="/items/filter?type=work_due"
+            hx-target="#timeline-container"
+            onclick="setActiveFilter(this)">
+      Work
+    </button>
+    <button class="filter-btn"
+            hx-get="/items/filter?type=event"
+            hx-target="#timeline-container"
+            onclick="setActiveFilter(this)">
+      Events
+    </button>
+  </div>
+
+  <div class="search-box">
+    <input id="search-input"
+           type="text"
+           name="search"
+           class="search-input"
+           placeholder="Search (press /)..."
+           hx-get="/items/filter"
+           hx-trigger="keyup changed delay:200ms"
+           hx-target="#timeline-container"
+           hx-include="[name='type']">
+    <span class="kbd-hint">/</span>
+  </div>
+</div>
+
+<div id="timeline-container">
+  {{template "timeline_content.html" .}}
+</div>
+
+<div id="modal-container"></div>
+{{template "add_modal.html" .}}
+
+<script>
+function setActiveFilter(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+{{end}}

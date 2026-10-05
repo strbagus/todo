@@ -11,6 +11,20 @@ import (
 // FuncMap defines helper functions available across all HTML templates.
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
+		"dict": func(values ...any) (map[string]any, error) {
+			if len(values)%2 != 0 {
+				return nil, fmt.Errorf("invalid dict call: odd number of arguments")
+			}
+			m := make(map[string]any, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, fmt.Errorf("dict keys must be strings")
+				}
+				m[key] = values[i+1]
+			}
+			return m, nil
+		},
 		"formatDate": func(t time.Time) string {
 			return t.Format("Monday, January 2, 2006")
 		},
