@@ -72,3 +72,9 @@ func ParseTemplates() (*template.Template, error) {
 func Render(w io.Writer, tmpl *template.Template, name string, data any) error {
 	return tmpl.ExecuteTemplate(w, name, data)
 }
+
+// ReadStaticFile reads a file from the embedded static filesystem.
+func ReadStaticFile(name string) ([]byte, error) {
+	return web.FS.ReadFile(name)
+}
+

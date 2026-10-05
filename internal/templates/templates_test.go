@@ -21,3 +21,14 @@ func TestTemplateParsing(t *testing.T) {
 		t.Errorf("expected cheatsheet modal to contain 'Vim Shortcuts'")
 	}
 }
+
+func TestStaticCSS_DefinesHidden(t *testing.T) {
+	cssBytes, err := templates.ReadStaticFile("static/css/style.css")
+	if err != nil {
+		t.Fatalf("failed to read static/css/style.css: %v", err)
+	}
+	if !bytes.Contains(cssBytes, []byte(".hidden")) {
+		t.Errorf("expected style.css to define .hidden class for modal visibility toggling")
+	}
+}
+

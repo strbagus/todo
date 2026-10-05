@@ -54,7 +54,9 @@
       // Close any visible modal
       const modals = document.querySelectorAll(".modal-backdrop");
       modals.forEach((m) => {
-        if (!m.classList.contains("hidden")) {
+        if (m.id === "edit-modal") {
+          m.remove();
+        } else {
           m.classList.add("hidden");
         }
       });

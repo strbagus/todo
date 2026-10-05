@@ -33,6 +33,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.hidden {
+  display: none !important;
+}
+
+
 /* Container */
 .container {
   max-width: 900px;
