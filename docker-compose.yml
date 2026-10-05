@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  todo:
+    image: todo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+      - DB_PATH=/data/todo.db
+      - TZ=Asia/Jakarta
+    volumes:
+      - todo_data:/data
+    networks:
+      - proxy
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.hostname == stb1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.todo.rule=Host(`todo.strbagus.com`)"
+        - "traefik.http.routers.todo.entrypoints=websecure"
+        - "traefik.http.routers.todo.tls=true"
+        - "traefik.http.services.todo.loadbalancer.server.port=8080"
+
+volumes:
+  todo_data:
+    driver: local
+
+networks:
+  proxy:
+    external: true

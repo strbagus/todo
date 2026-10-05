@@ -19,3 +19,12 @@ test:
 # Clean build artifacts
 clean:
 	rm -rf bin/
+
+# Build docker image
+docker-build:
+	docker build -t todo:latest .
+
+# Deploy stack to Swarm
+stack-deploy:
+	docker stack deploy -c docker-compose.yml todo
+
