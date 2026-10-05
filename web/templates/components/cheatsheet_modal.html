@@ -1,0 +1,26 @@
+{{define "cheatsheet_modal.html"}}
+<div id="cheatsheet-modal" class="modal-backdrop hidden" onclick="if(event.target===this) this.classList.add('hidden')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">⌨️ Vim Shortcuts</h3>
+      <button class="action-btn" onclick="document.getElementById('cheatsheet-modal').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body">
+      <table class="shortcut-table">
+        <tbody>
+          <tr><td><span class="shortcut-key">j</span> / <span class="shortcut-key">k</span></td><td>Move selection down / up</td></tr>
+          <tr><td><span class="shortcut-key">gg</span> / <span class="shortcut-key">G</span></td><td>Jump to top / bottom</td></tr>
+          <tr><td><span class="shortcut-key">x</span> or <span class="shortcut-key">Space</span></td><td>Toggle task complete</td></tr>
+          <tr><td><span class="shortcut-key">o</span> or <span class="shortcut-key">a</span></td><td>Add new item modal</td></tr>
+          <tr><td><span class="shortcut-key">e</span></td><td>Edit selected item</td></tr>
+          <tr><td><span class="shortcut-key">dd</span></td><td>Delete selected item</td></tr>
+          <tr><td><span class="shortcut-key">/</span></td><td>Focus search bar</td></tr>
+          <tr><td><span class="shortcut-key">1</span> - <span class="shortcut-key">4</span></td><td>Switch filter (All, College, Work, Events)</td></tr>
+          <tr><td><span class="shortcut-key">Esc</span></td><td>Close modal / clear focus</td></tr>
+          <tr><td><span class="shortcut-key">?</span></td><td>Toggle this cheatsheet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{{end}}
