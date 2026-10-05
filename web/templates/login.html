@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login &bull; Todo & Deadlines</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .login-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 0.75rem;
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="font-size: 2.25rem; margin-bottom: 0.5rem;">🔒</div>
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: #f8fafc;">Sign In</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Persistent access to your new-tab dashboard</p>
+      </div>
+
+      {{if .Error}}
+        <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 0.85rem; padding: 0.6rem 0.75rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+          {{.Error}}
+        </div>
+      {{end}}
+
+      <form method="POST" action="/login">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required autofocus>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.6rem;">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

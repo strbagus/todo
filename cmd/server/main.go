@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"todo/internal/auth"
 	"todo/internal/database"
 	"todo/internal/handlers"
 	"todo/internal/repository"
@@ -26,11 +27,27 @@ func main() {
 		defaultDB = "todo.db"
 	}
 
+	defaultAuthUser := os.Getenv("AUTH_USERNAME")
+	defaultAuthPass := os.Getenv("AUTH_PASSWORD")
+
 	port := flag.String("port", defaultPort, "HTTP server port")
 	dbPath := flag.String("db", defaultDB, "SQLite database file path")
+	authUser := flag.String("auth-user", defaultAuthUser, "Username for basic authentication (optional)")
+	authPass := flag.String("auth-pass", defaultAuthPass, "Password for basic authentication (optional)")
 	flag.Parse()
 
 	log.Printf("Starting Todo & Deadline Tracker on :%s (database: %s)...", *port, *dbPath)
+
+	authCfg := auth.Config{
+		Username: *authUser,
+		Password: *authPass,
+	}
+
+	if authCfg.IsEnabled() {
+		log.Printf("🔐 Authentication enabled (username: %s, persistent cookie enabled)", authCfg.Username)
+	} else {
+		log.Println("🔓 Authentication disabled (no credentials configured)")
+	}
 
 	// Initialize SQLite database
 	db, err := database.InitDB(*dbPath)
@@ -53,12 +70,12 @@ func main() {
 		log.Fatalf("Template parsing failed: %v", err)
 	}
 
-	// Register routes
-	mux := handlers.RegisterRoutes(repo, tmpl)
+	// Register routes with authentication
+	handler := handlers.RegisterRoutesWithAuth(repo, tmpl, authCfg)
 
 	server := &http.Server{
 		Addr:         ":" + *port,
-		Handler:      mux,
+		Handler:      handler,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
