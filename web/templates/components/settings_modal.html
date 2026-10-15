@@ -1,0 +1,76 @@
+{{define "settings_modal.html"}}
+<div id="settings-modal" class="modal-backdrop hidden" onclick="if(event.target===this) this.classList.add('hidden')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Settings</h3>
+      <button type="button" class="action-btn" onclick="document.getElementById('settings-modal').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="setting-bg-url">Wallpaper Background</label>
+        <input type="text" id="setting-bg-url" class="form-control" placeholder="/static/img/mywall.jpg or https://image-url..." />
+      </div>
+
+      <div class="bg-presets">
+        <button type="button" class="preset-pill" onclick="setPresetBg('/static/img/mywall.jpg')">mywall.jpg (Default)</button>
+        <button type="button" class="preset-pill" onclick="setPresetBg('none')">Dark Gradient (No Image)</button>
+      </div>
+
+      <div class="form-group" style="margin-top: 0.5rem;">
+        <label class="form-label">Upload Custom Image</label>
+        <input type="file" id="setting-bg-file" accept="image/*" class="form-control" style="padding: 0.35rem 0.5rem;" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="document.getElementById('settings-modal').classList.add('hidden')">Close</button>
+      <button type="button" class="btn-primary" onclick="saveBackgroundSetting()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openSettingsModal() {
+  const modal = document.getElementById('settings-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    const input = document.getElementById('setting-bg-url');
+    if (input && window.getCustomBackground) {
+      input.value = window.getCustomBackground();
+    }
+  }
+}
+
+function setPresetBg(val) {
+  const input = document.getElementById('setting-bg-url');
+  if (input) input.value = val;
+  if (window.setCustomBackground) {
+    window.setCustomBackground(val);
+  }
+}
+
+function saveBackgroundSetting() {
+  const input = document.getElementById('setting-bg-url');
+  const val = input ? input.value.trim() : '';
+  if (window.setCustomBackground) {
+    window.setCustomBackground(val || '/static/img/mywall.jpg');
+  }
+  document.getElementById('settings-modal').classList.add('hidden');
+}
+
+// File input handler: converts uploaded file to base64 DataURL
+document.getElementById('setting-bg-file')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const dataUrl = evt.target.result;
+    const input = document.getElementById('setting-bg-url');
+    if (input) input.value = dataUrl;
+    if (window.setCustomBackground) {
+      window.setCustomBackground(dataUrl);
+    }
+  };
+  reader.readAsDataURL(file);
+});
+</script>
+{{end}}

@@ -3,11 +3,9 @@
   <div class="item-left">
     {{if eq .Type "event"}}
       <div class="event-icon" title="Event">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-          <line x1="16" x2="16" y1="2" y2="6"/>
-          <line x1="8" x2="8" y1="2" y2="6"/>
-          <line x1="3" x2="21" y1="10" y2="10"/>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 7 12 12 15 15"/>
         </svg>
       </div>
     {{else}}
@@ -24,36 +22,30 @@
       <div class="item-title-row">
         <span class="item-title">{{.Title}}</span>
 
-        {{if eq .Type "college_task"}}
-          <span class="badge badge-college">College{{if .ContextTag}}: {{.ContextTag}}{{end}}</span>
-        {{else if eq .Type "work_due"}}
-          <span class="badge badge-work">Work{{if .ContextTag}}: {{.ContextTag}}{{end}}</span>
-        {{else}}
-          <span class="badge badge-event">Event{{if .ContextTag}}: {{.ContextTag}}{{end}}</span>
+        {{if .ContextTag}}
+          <span class="badge badge-minimal">{{.ContextTag}}</span>
         {{end}}
 
         {{if eq .Priority "high"}}
-          <span class="priority-high">● High</span>
-        {{else if eq .Priority "low"}}
-          <span class="priority-low">● Low</span>
+          <span class="priority-dot high" title="High Priority"></span>
         {{end}}
       </div>
 
       <div class="item-meta">
         {{if eq .Type "event"}}
-          <span>🕒 {{formatTime .StartAt}}{{if .EndAt}} – {{formatTime .EndAt}}{{end}}</span>
+          <span>{{formatTime .StartAt}}{{if .EndAt}} – {{formatTime .EndAt}}{{end}}</span>
           {{if .LocationOrURL}}
-            <span>📍 {{.LocationOrURL}}</span>
+            <span>&bull; {{.LocationOrURL}}</span>
           {{end}}
         {{else}}
-          <span>⏰ Due: {{formatTime .StartAt}} ({{formatRelative .StartAt}})</span>
+          <span>Due: {{formatTime .StartAt}} ({{formatRelative .StartAt}})</span>
           {{if .LocationOrURL}}
-            <span>🔗 <a href="{{.LocationOrURL}}" target="_blank" style="color: var(--accent); text-decoration: underline;">Link</a></span>
+            <span>&bull; <a href="{{.LocationOrURL}}" target="_blank" style="color: var(--text-muted); text-decoration: underline;">Link</a></span>
           {{end}}
         {{end}}
 
         {{if .Description}}
-          <span style="color: #64748b;">• {{.Description}}</span>
+          <span>&bull; {{.Description}}</span>
         {{end}}
       </div>
     </div>
@@ -63,15 +55,21 @@
     <button class="action-btn edit"
             hx-get="/items/{{.ID}}/edit"
             hx-target="#modal-container"
-            title="Edit item (e)">
-      ✏️
+            title="Edit (e)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
     </button>
     <button class="action-btn delete"
             hx-delete="/items/{{.ID}}"
             hx-target="#item-{{.ID}}"
             hx-swap="outerHTML"
-            title="Delete item (dd)">
-      🗑️
+            title="Delete (dd)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
     </button>
   </div>
 </div>

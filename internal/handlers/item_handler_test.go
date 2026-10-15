@@ -46,7 +46,7 @@ func TestItemHandler_Endpoints(t *testing.T) {
 	// 2. Valid creation returns 200/201 with item card
 	now := time.Now().Format("2006-01-02T15:04")
 	form.Set("title", "Finish Thesis Proposal")
-	form.Set("type", string(models.TypeCollegeTask))
+	form.Set("type", string(models.TypeTask))
 	form.Set("start_at", now)
 	form.Set("priority", string(models.PriorityHigh))
 	req = httptest.NewRequest(http.MethodPost, "/items", strings.NewReader(form.Encode()))
@@ -92,7 +92,7 @@ func TestItemHandler_Endpoints(t *testing.T) {
 	// 5. Update item
 	updateForm := url.Values{}
 	updateForm.Set("title", "Finish Thesis Proposal (Final)")
-	updateForm.Set("type", string(models.TypeCollegeTask))
+	updateForm.Set("type", string(models.TypeTask))
 	updateForm.Set("start_at", now)
 	updateForm.Set("priority", string(models.PriorityHigh))
 	req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("/items/%d", targetID), strings.NewReader(updateForm.Encode()))
@@ -107,7 +107,7 @@ func TestItemHandler_Endpoints(t *testing.T) {
 	}
 
 	// 6. Filter endpoint
-	req = httptest.NewRequest(http.MethodGet, "/items/filter?type=college_task", nil)
+	req = httptest.NewRequest(http.MethodGet, "/items/filter?type=task", nil)
 	rec = httptest.NewRecorder()
 	mux.ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {

@@ -108,8 +108,12 @@
       case "o":
       case "a":
         e.preventDefault();
-        const addBtn = document.getElementById("btn-add-item");
-        if (addBtn) addBtn.click();
+        if (typeof openAddModal === "function") {
+          openAddModal();
+        } else {
+          const addBtn = document.getElementById("btn-add-item");
+          if (addBtn) addBtn.click();
+        }
         break;
 
       case "e":
@@ -141,17 +145,7 @@
         }
         break;
 
-      case "1":
-      case "2":
-      case "3":
-      case "4":
-        e.preventDefault();
-        const filterBtns = document.querySelectorAll(".filter-btn");
-        const idx = parseInt(e.key, 10) - 1;
-        if (filterBtns[idx]) filterBtns[idx].click();
-        break;
-
-      case "?":
+case "?":
         e.preventDefault();
         const cheatsheet = document.getElementById("cheatsheet-modal");
         if (cheatsheet) {

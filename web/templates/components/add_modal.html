@@ -2,74 +2,79 @@
 <div id="add-modal" class="modal-backdrop hidden" onclick="if(event.target===this) this.classList.add('hidden')">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 class="modal-title">✨ Add New Item</h3>
+      <h3 class="modal-title">New Item</h3>
       <button type="button" class="action-btn" onclick="document.getElementById('add-modal').classList.add('hidden')">✕</button>
     </div>
     <form id="add-item-form"
           hx-post="/items"
           hx-target="#timeline-container"
           hx-swap="innerHTML"
-          hx-on::after-request="if(event.detail.successful) { document.getElementById('add-modal').classList.add('hidden'); this.reset(); }">
+          hx-on::after-request="if(event.detail.successful) { document.getElementById('add-modal').classList.add('hidden'); this.reset(); resetAddForm(); }">
       <div class="modal-body">
         <div id="form-error-msg" style="color: #f87171; font-size: 0.85rem; margin-bottom: 0.75rem;"></div>
 
         <div class="form-group">
-          <label class="form-label">Type</label>
           <div class="type-selector">
-            <label class="type-option active" onclick="selectType(this, 'college_task')">
-              <input type="radio" name="type" value="college_task" checked style="display:none;">
-              🎓 College Task
+            <label class="type-option active" id="add-type-task" onclick="selectType('task')">
+              <input type="radio" name="type" value="task" checked style="display:none;">
+              <span>Task</span> <span class="type-kbd">1</span>
             </label>
-            <label class="type-option" onclick="selectType(this, 'work_due')">
-              <input type="radio" name="type" value="work_due" style="display:none;">
-              💼 Work Due
-            </label>
-            <label class="type-option" onclick="selectType(this, 'event')">
+            <label class="type-option" id="add-type-event" onclick="selectType('event')">
               <input type="radio" name="type" value="event" style="display:none;">
-              📅 Event
+              <span>Event</span> <span class="type-kbd">2</span>
             </label>
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="add-title">Title *</label>
-          <input type="text" id="add-title" name="title" class="form-control" placeholder="e.g. CS101 Homework or Team Sync" required autofocus>
+          <input type="text" id="add-title" name="title" class="form-control" placeholder="What needs to be done?" required autofocus>
         </div>
 
         <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
           <div>
-            <label class="form-label" id="label-start-at">Due / Start Date *</label>
+            <label class="form-label" id="label-start-at">Due Date *</label>
             <input type="datetime-local" id="add-start-at" name="start_at" class="form-control" required>
           </div>
           <div id="end-at-container" style="display: none;">
             <label class="form-label">End Date (optional)</label>
             <input type="datetime-local" id="add-end-at" name="end_at" class="form-control">
           </div>
-          <div id="priority-container">
-            <label class="form-label">Priority</label>
-            <select name="priority" class="form-control">
-              <option value="medium" selected>Medium</option>
-              <option value="high">High</option>
-              <option value="low">Low</option>
-            </select>
+          <div id="tag-container">
+            <label class="form-label" id="label-tag">Tag</label>
+            <input type="text" id="add-context-tag" name="context_tag" class="form-control" placeholder="e.g. Work, Study, Personal">
           </div>
         </div>
 
-        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-          <div>
-            <label class="form-label" id="label-tag">Course / Project Tag</label>
-            <input type="text" name="context_tag" class="form-control" placeholder="e.g. CS301 or Sprint-1">
-          </div>
-          <div>
-            <label class="form-label" id="label-url">Location or URL</label>
-            <input type="text" name="location_or_url" class="form-control" placeholder="e.g. Room 402 or https://...">
-          </div>
-        </div>
+        <details class="extra-fields" id="add-extra-fields">
+          <summary class="extra-summary">
+            <span>Extra options</span>
+            <svg class="summary-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <div class="extra-content">
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div id="priority-container">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-control">
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" id="label-url">Location or URL</label>
+                <input type="text" name="location_or_url" class="form-control" placeholder="e.g. Room 402 or https://...">
+              </div>
+            </div>
 
-        <div class="form-group">
-          <label class="form-label">Description (optional)</label>
-          <textarea name="description" class="form-control" rows="2" placeholder="Additional details or notes..."></textarea>
-        </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Description (optional)</label>
+              <textarea name="description" class="form-control" rows="2" placeholder="Notes..."></textarea>
+            </div>
+          </div>
+        </details>
       </div>
 
       <div class="modal-footer">
@@ -81,39 +86,102 @@
 </div>
 
 <script>
-function selectType(el, type) {
-  document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('active'));
-  el.classList.add('active');
-  const radio = el.querySelector('input[type="radio"]');
-  if (radio) radio.checked = true;
-
+function selectType(type) {
+  const taskOpt = document.getElementById('add-type-task');
+  const eventOpt = document.getElementById('add-type-event');
   const endContainer = document.getElementById('end-at-container');
   const priorityContainer = document.getElementById('priority-container');
   const labelStart = document.getElementById('label-start-at');
   const labelTag = document.getElementById('label-tag');
 
   if (type === 'event') {
+    if (taskOpt) taskOpt.classList.remove('active');
+    if (eventOpt) {
+      eventOpt.classList.add('active');
+      const radio = eventOpt.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    }
     if (endContainer) endContainer.style.display = 'block';
     if (priorityContainer) priorityContainer.style.display = 'none';
     if (labelStart) labelStart.textContent = 'Event Start *';
     if (labelTag) labelTag.textContent = 'Event Tag';
   } else {
+    if (eventOpt) eventOpt.classList.remove('active');
+    if (taskOpt) {
+      taskOpt.classList.add('active');
+      const radio = taskOpt.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    }
     if (endContainer) endContainer.style.display = 'none';
     if (priorityContainer) priorityContainer.style.display = 'block';
     if (labelStart) labelStart.textContent = 'Due Date *';
-    if (labelTag) labelTag.textContent = type === 'college_task' ? 'Course Tag' : 'Project Tag';
+    if (labelTag) labelTag.textContent = 'Tag';
   }
 }
 
-// Default date to now rounded to next hour
-document.addEventListener('DOMContentLoaded', function() {
+function resetAddForm() {
+  selectType('task');
+  const extra = document.getElementById('add-extra-fields');
+  if (extra) extra.removeAttribute('open');
+  initAddDate();
+}
+
+function initAddDate() {
   const startInput = document.getElementById('add-start-at');
-  if (startInput && !startInput.value) {
+  if (startInput) {
     const d = new Date();
     d.setMinutes(0, 0, 0);
     d.setHours(d.getHours() + 1);
     const pad = n => String(n).padStart(2, '0');
     startInput.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initAddDate);
+
+// Trap tab & keybinds inside add-modal
+document.getElementById('add-modal')?.addEventListener('keydown', function(e) {
+  // Keybind 1 = Task, 2 = Event
+  const activeEl = document.activeElement;
+  const isTextInput = activeEl && (activeEl.tagName === 'INPUT' && activeEl.type !== 'radio' || activeEl.tagName === 'TEXTAREA');
+
+  if (!isTextInput) {
+    if (e.key === '1') {
+      e.preventDefault();
+      selectType('task');
+      return;
+    }
+    if (e.key === '2') {
+      e.preventDefault();
+      selectType('event');
+      return;
+    }
+  }
+
+  if (e.key === 'Tab') {
+    const form = document.getElementById('add-item-form');
+    if (!form) return;
+    const focusables = Array.from(form.querySelectorAll('input:not([type="radio"]):not([type="hidden"]), select, textarea, button:not([disabled])'))
+      .filter(el => {
+        // Only visible elements
+        return el.offsetParent !== null;
+      });
+
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
   }
 });
 </script>

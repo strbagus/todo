@@ -1,70 +1,88 @@
 {{template "base.html" .}}
 
 {{define "content"}}
-<header class="header">
-  <div>
-    <h1 class="date-display">{{formatDate .TodayDate}}</h1>
-    <p class="subtitle">Focus & Deadlines Dashboard</p>
-  </div>
-  <div style="display: flex; gap: 0.5rem;">
-    <button id="btn-add-item" class="btn-primary" onclick="document.getElementById('add-modal').classList.remove('hidden')">
-      <span>+ Add (o)</span>
-    </button>
-    <button class="btn-secondary" onclick="document.getElementById('cheatsheet-modal').classList.toggle('hidden')" title="Keyboard shortcuts (?)">
-      <span>⌨️ ?</span>
-    </button>
-    <form method="POST" action="/logout" style="margin: 0;">
-      <button type="submit" class="btn-secondary" title="Sign Out" style="height: 100%;">
-        <span>🚪</span>
-      </button>
-    </form>
-  </div>
-</header>
+<div class="bonjourr-layout">
+  <!-- Minimalist Center: Clock & Date -->
+  <main class="center-main">
+    <div class="clock-wrap">
+      <div id="clock-time" class="clock-time">12:00</div>
+      <div id="clock-date" class="clock-date">{{formatDate .TodayDate}}</div>
+      <div id="clock-greeting" class="clock-greeting">Make today count</div>
+    </div>
+  </main>
 
-<div class="toolbar">
-  <div class="filters">
-    <button class="filter-btn active"
-            hx-get="/items/filter"
-            hx-target="#timeline-container"
-            onclick="setActiveFilter(this)">
-      All
-    </button>
-    <button class="filter-btn"
-            hx-get="/items/filter?type=college_task"
-            hx-target="#timeline-container"
-            onclick="setActiveFilter(this)">
-      College
-    </button>
-    <button class="filter-btn"
-            hx-get="/items/filter?type=work_due"
-            hx-target="#timeline-container"
-            onclick="setActiveFilter(this)">
-      Work
-    </button>
-    <button class="filter-btn"
-            hx-get="/items/filter?type=event"
-            hx-target="#timeline-container"
-            onclick="setActiveFilter(this)">
-      Events
-    </button>
-  </div>
+  <!-- Right Side Panel: Minimalist Todo -->
+  <aside class="todo-panel" id="todo-panel">
+    <header class="panel-header">
+      <div>
+        <h2 class="panel-title">Todo</h2>
+      </div>
+      <div class="panel-actions">
+        <button id="btn-add-item" class="btn-primary-sm" onclick="openAddModal()" title="Add item (o)">
+          <span>+ Add</span>
+        </button>
+        <button class="btn-icon" onclick="openSettingsModal()" title="Wallpaper Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button class="btn-icon" onclick="document.getElementById('cheatsheet-modal').classList.toggle('hidden')" title="Shortcuts (?)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/>
+          </svg>
+        </button>
+        <form method="POST" action="/logout" style="margin: 0;">
+          <button type="submit" class="btn-icon" title="Sign Out">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </header>
 
-  <div class="search-box">
-    <input id="search-input"
-           type="text"
-           name="search"
-           class="search-input"
-           placeholder="Search (press /)..."
-           hx-get="/items/filter"
-           hx-trigger="keyup changed delay:200ms"
-           hx-target="#timeline-container"
-           hx-include="[name='type']">
-    <span class="kbd-hint">/</span>
-  </div>
-</div>
+    <div class="toolbar">
+      <div class="filters">
+        <button class="filter-btn active"
+                hx-get="/items/filter"
+                hx-target="#timeline-container"
+                onclick="setActiveFilter(this)">
+          All
+        </button>
+        <button class="filter-btn"
+                hx-get="/items/filter?type=task"
+                hx-target="#timeline-container"
+                onclick="setActiveFilter(this)">
+          Tasks
+        </button>
+        <button class="filter-btn"
+                hx-get="/items/filter?type=event"
+                hx-target="#timeline-container"
+                onclick="setActiveFilter(this)">
+          Events
+        </button>
+      </div>
 
-<div id="timeline-container">
-  {{template "timeline_content.html" .}}
+      <div class="search-box">
+        <input id="search-input"
+               type="text"
+               name="search"
+               class="search-input"
+               placeholder="Search..."
+               hx-get="/items/filter"
+               hx-trigger="keyup changed delay:200ms"
+               hx-target="#timeline-container"
+               hx-include="[name='type']">
+        <span class="kbd-hint">/</span>
+      </div>
+    </div>
+
+    <div id="timeline-container" class="panel-timeline">
+      {{template "timeline_content.html" .}}
+    </div>
+  </aside>
 </div>
 
 <div id="modal-container"></div>
@@ -74,6 +92,17 @@
 function setActiveFilter(btn) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+}
+
+function openAddModal() {
+  const modal = document.getElementById('add-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    const input = document.getElementById('add-title');
+    if (input) {
+      setTimeout(() => input.focus(), 50);
+    }
+  }
 }
 </script>
 {{end}}

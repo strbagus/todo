@@ -13,6 +13,8 @@ type TimelineGroups struct {
 }
 
 // GroupItems groups items into timeline buckets based on local date/time.
+// Completed items are hidden if their end/due date is strictly before today.
+// Overdue items include incomplete tasks whose due date is before today.
 func GroupItems(items []Item, now time.Time) TimelineGroups {
 	groups := TimelineGroups{
 		Overdue:   make([]Item, 0),
@@ -27,13 +29,22 @@ func GroupItems(items []Item, now time.Time) TimelineGroups {
 	dayAfterStart := todayStart.AddDate(0, 0, 2)
 
 	for _, item := range items {
+		// Cutoff date is EndAt if present, otherwise StartAt
+		cutoff := item.StartAt
+		if item.EndAt != nil {
+			cutoff = *item.EndAt
+		}
+
 		if item.IsCompleted {
-			groups.Completed = append(groups.Completed, item)
+			// Completed tasks not shown after end/due date has passed (before todayStart)
+			if !cutoff.Before(todayStart) {
+				groups.Completed = append(groups.Completed, item)
+			}
 			continue
 		}
 
 		if item.StartAt.Before(todayStart) {
-			if item.Type == TypeCollegeTask || item.Type == TypeWorkDue {
+			if item.Type == TypeTask {
 				groups.Overdue = append(groups.Overdue, item)
 			}
 		} else if item.StartAt.Before(tomorrowStart) {

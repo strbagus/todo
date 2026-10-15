@@ -28,7 +28,7 @@ func TestItemRepo_CRUD(t *testing.T) {
 	item := &models.Item{
 		Title:       "CS101 Homework",
 		Description: "Chapters 1-3",
-		Type:        models.TypeCollegeTask,
+		Type:        models.TypeTask,
 		StartAt:     now,
 		ContextTag:  "CS101",
 		Priority:    models.PriorityHigh,
@@ -70,11 +70,11 @@ func TestItemRepo_CRUD(t *testing.T) {
 	}
 
 	// 4. List with filter and search
-	list, err := repo.List(ctx, models.TypeCollegeTask, "Homework")
+	list, err := repo.List(ctx, models.TypeTask, "Homework")
 	if err != nil || len(list) != 1 {
 		t.Fatalf("List with search failed or unexpected count: len=%d, err=%v", len(list), err)
 	}
-	listEmpty, err := repo.List(ctx, models.TypeWorkDue, "")
+	listEmpty, err := repo.List(ctx, models.TypeEvent, "")
 	if err != nil || len(listEmpty) != 0 {
 		t.Fatalf("expected 0 work dues, got len=%d", len(listEmpty))
 	}

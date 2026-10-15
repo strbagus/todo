@@ -17,10 +17,10 @@ func TestItem_Validate(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "valid college task",
+			name: "valid task",
 			item: models.Item{
 				Title:    "Math Assignment",
-				Type:     models.TypeCollegeTask,
+				Type:     models.TypeTask,
 				StartAt:  now,
 				Priority: models.PriorityMedium,
 			},
@@ -30,7 +30,7 @@ func TestItem_Validate(t *testing.T) {
 			name: "empty title fails",
 			item: models.Item{
 				Title:   "   ",
-				Type:    models.TypeWorkDue,
+				Type:    models.TypeTask,
 				StartAt: now,
 			},
 			wantErr: true,

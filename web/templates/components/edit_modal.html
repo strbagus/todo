@@ -2,10 +2,11 @@
 <div id="edit-modal" class="modal-backdrop" onclick="if(event.target===this) this.remove()">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 class="modal-title">✏️ Edit Item</h3>
+      <h3 class="modal-title">Edit Item</h3>
       <button type="button" class="action-btn" onclick="document.getElementById('edit-modal').remove()">✕</button>
     </div>
-    <form hx-put="/items/{{.ID}}"
+    <form id="edit-item-form"
+          hx-put="/items/{{.ID}}"
           hx-target="#item-{{.ID}}"
           hx-swap="outerHTML"
           hx-on::after-request="if(event.detail.successful) { document.getElementById('edit-modal').remove(); }">
@@ -13,19 +14,14 @@
         <div id="edit-form-error-msg" style="color: #f87171; font-size: 0.85rem; margin-bottom: 0.75rem;"></div>
 
         <div class="form-group">
-          <label class="form-label">Type</label>
           <div class="type-selector">
-            <label class="type-option {{if eq .Type "college_task"}}active{{end}}" onclick="selectEditType(this, 'college_task')">
-              <input type="radio" name="type" value="college_task" {{if eq .Type "college_task"}}checked{{end}} style="display:none;">
-              🎓 College Task
+            <label class="type-option {{if eq .Type "task"}}active{{end}}" id="edit-type-task" onclick="selectEditType('task')">
+              <input type="radio" name="type" value="task" {{if eq .Type "task"}}checked{{end}} style="display:none;">
+              <span>Task</span> <span class="type-kbd">1</span>
             </label>
-            <label class="type-option {{if eq .Type "work_due"}}active{{end}}" onclick="selectEditType(this, 'work_due')">
-              <input type="radio" name="type" value="work_due" {{if eq .Type "work_due"}}checked{{end}} style="display:none;">
-              💼 Work Due
-            </label>
-            <label class="type-option {{if eq .Type "event"}}active{{end}}" onclick="selectEditType(this, 'event')">
+            <label class="type-option {{if eq .Type "event"}}active{{end}}" id="edit-type-event" onclick="selectEditType('event')">
               <input type="radio" name="type" value="event" {{if eq .Type "event"}}checked{{end}} style="display:none;">
-              📅 Event
+              <span>Event</span> <span class="type-kbd">2</span>
             </label>
           </div>
         </div>
@@ -44,31 +40,41 @@
             <label class="form-label">End Date (optional)</label>
             <input type="datetime-local" name="end_at" class="form-control" value="{{if .EndAt}}{{formatDateTimeInput .EndAt}}{{end}}">
           </div>
-          <div id="edit-priority-container" style="{{if eq .Type "event"}}display:none;{{else}}display:block;{{end}}">
-            <label class="form-label">Priority</label>
-            <select name="priority" class="form-control">
-              <option value="low" {{if eq .Priority "low"}}selected{{end}}>Low</option>
-              <option value="medium" {{if eq .Priority "medium"}}selected{{end}}>Medium</option>
-              <option value="high" {{if eq .Priority "high"}}selected{{end}}>High</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-          <div>
-            <label class="form-label">Course / Project Tag</label>
+          <div id="edit-tag-container">
+            <label class="form-label">Tag</label>
             <input type="text" name="context_tag" class="form-control" value="{{.ContextTag}}">
           </div>
-          <div>
-            <label class="form-label">Location or URL</label>
-            <input type="text" name="location_or_url" class="form-control" value="{{.LocationOrURL}}">
-          </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Description (optional)</label>
-          <textarea name="description" class="form-control" rows="2">{{.Description}}</textarea>
-        </div>
+        <details class="extra-fields" id="edit-extra-fields" {{if or .Description .LocationOrURL (ne .Priority "medium")}}open{{end}}>
+          <summary class="extra-summary">
+            <span>Extra options</span>
+            <svg class="summary-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <div class="extra-content">
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div id="edit-priority-container" style="{{if eq .Type "event"}}display:none;{{else}}display:block;{{end}}">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-control">
+                  <option value="low" {{if eq .Priority "low"}}selected{{end}}>Low</option>
+                  <option value="medium" {{if eq .Priority "medium"}}selected{{end}}>Medium</option>
+                  <option value="high" {{if eq .Priority "high"}}selected{{end}}>High</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Location or URL</label>
+                <input type="text" name="location_or_url" class="form-control" value="{{.LocationOrURL}}">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Description (optional)</label>
+              <textarea name="description" class="form-control" rows="2">{{.Description}}</textarea>
+            </div>
+          </div>
+        </details>
       </div>
 
       <div class="modal-footer">
@@ -80,25 +86,75 @@
 </div>
 
 <script>
-function selectEditType(el, type) {
-  document.querySelectorAll('#edit-modal .type-option').forEach(opt => opt.classList.remove('active'));
-  el.classList.add('active');
-  const radio = el.querySelector('input[type="radio"]');
-  if (radio) radio.checked = true;
-
+function selectEditType(type) {
+  const taskOpt = document.getElementById('edit-type-task');
+  const eventOpt = document.getElementById('edit-type-event');
   const endContainer = document.getElementById('edit-end-at-container');
   const priorityContainer = document.getElementById('edit-priority-container');
   const labelStart = document.getElementById('edit-label-start-at');
 
   if (type === 'event') {
+    if (taskOpt) taskOpt.classList.remove('active');
+    if (eventOpt) {
+      eventOpt.classList.add('active');
+      const radio = eventOpt.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    }
     if (endContainer) endContainer.style.display = 'block';
     if (priorityContainer) priorityContainer.style.display = 'none';
     if (labelStart) labelStart.textContent = 'Event Start *';
   } else {
+    if (eventOpt) eventOpt.classList.remove('active');
+    if (taskOpt) {
+      taskOpt.classList.add('active');
+      const radio = taskOpt.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    }
     if (endContainer) endContainer.style.display = 'none';
     if (priorityContainer) priorityContainer.style.display = 'block';
     if (labelStart) labelStart.textContent = 'Due Date *';
   }
 }
+
+document.getElementById('edit-modal')?.addEventListener('keydown', function(e) {
+  const activeEl = document.activeElement;
+  const isTextInput = activeEl && (activeEl.tagName === 'INPUT' && activeEl.type !== 'radio' || activeEl.tagName === 'TEXTAREA');
+
+  if (!isTextInput) {
+    if (e.key === '1') {
+      e.preventDefault();
+      selectEditType('task');
+      return;
+    }
+    if (e.key === '2') {
+      e.preventDefault();
+      selectEditType('event');
+      return;
+    }
+  }
+
+  if (e.key === 'Tab') {
+    const form = document.getElementById('edit-item-form');
+    if (!form) return;
+    const focusables = Array.from(form.querySelectorAll('input:not([type="radio"]):not([type="hidden"]), select, textarea, button:not([disabled])'))
+      .filter(el => el.offsetParent !== null);
+
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+});
 </script>
 {{end}}

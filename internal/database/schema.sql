@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS items (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     title           TEXT NOT NULL,
     description     TEXT NOT NULL DEFAULT '',
-    type            TEXT NOT NULL CHECK(type IN ('college_task', 'work_due', 'event')),
+    type            TEXT NOT NULL CHECK(type IN ('task', 'event')),
     start_at        DATETIME NOT NULL,
     end_at          DATETIME,
     context_tag     TEXT NOT NULL DEFAULT '',

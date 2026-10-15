@@ -1,0 +1,9 @@
+.git
+.gitignore
+bin
+*.db
+*.db-wal
+*.db-shm
+.env
+extension
+docs

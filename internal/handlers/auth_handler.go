@@ -16,6 +16,18 @@ func NewAuthHandler(cfg auth.Config, tmpl *template.Template) *AuthHandler {
 	return &AuthHandler{cfg: cfg, tmpl: tmpl}
 }
 
+// isRequestSecure checks if connection is HTTPS directly or via reverse proxy (Traefik/Cloudflare).
+func isRequestSecure(r *http.Request) bool {
+	if r.TLS != nil {
+		return true
+	}
+	proto := r.Header.Get("X-Forwarded-Proto")
+	if strings.EqualFold(proto, "https") {
+		return true
+	}
+	return false
+}
+
 // ServeLogin renders the login form page.
 func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 	if !h.cfg.IsEnabled() {
@@ -45,13 +57,15 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, h.cfg.NewSessionCookie())
+	secure := isRequestSecure(r)
+	http.SetCookie(w, h.cfg.NewSessionCookie(secure))
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // HandleLogout clears the session cookie and redirects to /login.
 func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, h.cfg.ClearSessionCookie())
+	secure := isRequestSecure(r)
+	http.SetCookie(w, h.cfg.ClearSessionCookie(secure))
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
 

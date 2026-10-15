@@ -9,9 +9,8 @@ import (
 type ItemType string
 
 const (
-	TypeCollegeTask ItemType = "college_task"
-	TypeWorkDue     ItemType = "work_due"
-	TypeEvent       ItemType = "event"
+	TypeTask  ItemType = "task"
+	TypeEvent ItemType = "event"
 )
 
 type Priority string
@@ -46,10 +45,10 @@ func (i *Item) Validate() error {
 	}
 
 	switch i.Type {
-	case TypeCollegeTask, TypeWorkDue, TypeEvent:
+	case TypeTask, TypeEvent:
 		// Valid type
 	default:
-		return errors.New("invalid item type; must be college_task, work_due, or event")
+		return errors.New("invalid item type; must be task or event")
 	}
 
 	if i.Priority == "" {

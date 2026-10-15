@@ -2,6 +2,7 @@ package auth
 
 import (
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/hex"
 	"net/http"
 )
@@ -16,12 +17,14 @@ func (c Config) IsEnabled() bool {
 	return c.Username != "" && c.Password != ""
 }
 
-// Validate checks whether the provided username and password match configuration.
+// Validate checks whether the provided username and password match configuration (constant time).
 func (c Config) Validate(user, pass string) bool {
 	if !c.IsEnabled() {
 		return true
 	}
-	return user == c.Username && pass == c.Password
+	userMatch := subtle.ConstantTimeCompare([]byte(user), []byte(c.Username)) == 1
+	passMatch := subtle.ConstantTimeCompare([]byte(pass), []byte(c.Password)) == 1
+	return userMatch && passMatch
 }
 
 // Token generates a deterministic SHA-256 hash of the credentials.
@@ -35,26 +38,40 @@ func (c Config) CookieName() string {
 	return "todo_auth_token"
 }
 
-// NewSessionCookie returns a persistent cookie with ~10 years lifespan (effectively no expiry).
-func (c Config) NewSessionCookie() *http.Cookie {
+// NewSessionCookie returns a persistent cookie compatible with cross-origin extension iframes.
+// SameSite=None and Secure=true allow the cookie inside extension iframes over HTTPS (production),
+// while falling back to SameSite=Lax for non-HTTPS (local development HTTP).
+func (c Config) NewSessionCookie(isSecure bool) *http.Cookie {
+	sameSite := http.SameSiteNoneMode
+	if !isSecure {
+		sameSite = http.SameSiteLaxMode
+	}
+
 	return &http.Cookie{
 		Name:     c.CookieName(),
 		Value:    c.Token(),
 		Path:     "/",
 		MaxAge:   315360000, // 10 years in seconds
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   isSecure,
+		SameSite: sameSite,
 	}
 }
 
 // ClearSessionCookie returns a cookie configured to delete the session.
-func (c Config) ClearSessionCookie() *http.Cookie {
+func (c Config) ClearSessionCookie(isSecure bool) *http.Cookie {
+	sameSite := http.SameSiteNoneMode
+	if !isSecure {
+		sameSite = http.SameSiteLaxMode
+	}
+
 	return &http.Cookie{
 		Name:     c.CookieName(),
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   isSecure,
+		SameSite: sameSite,
 	}
 }

@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Minimalist Todo New Tab",
+  "version": "1.0.0",
+  "description": "Bonjourr-style minimalist new tab page integrated with your Todo Dashboard",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "icons": {
+    "128": "icon128.png"
+  }
+}

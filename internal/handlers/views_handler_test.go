@@ -31,7 +31,7 @@ func TestServeDashboard(t *testing.T) {
 	// Seed item
 	err = repo.Create(context.Background(), &models.Item{
 		Title:    "Operating Systems Lab",
-		Type:     models.TypeCollegeTask,
+		Type:     models.TypeTask,
 		StartAt:  time.Now().Add(2 * time.Hour),
 		Priority: models.PriorityHigh,
 	})
